@@ -74,6 +74,9 @@ all : up
 secrets-fly:
 	( cd api && $(FLYCTL) secrets set $$(cat private/production.env ) )
 
+production-launch-fly : secrets-fly
+	( cd api && $(FLYCTL) launch )
+
 production-deploy-fly : secrets-fly
 	( cd api && $(FLYCTL) deploy )
 
