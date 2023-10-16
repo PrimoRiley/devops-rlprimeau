@@ -1,0 +1,31 @@
+# https://github.com/GoogleCloudPlatform/cloud-sdk-docker/tags
+FROM gcr.io/google.com/cloudsdktool/google-cloud-cli:427.0.0
+
+RUN apt update \
+  && DEBIAN_FRONTEND=noninteractive apt install -y \
+  curl git curl ca-certificates git-crypt gnupg openssl openssh-server python3 sudo \
+  && apt clean \
+  && /bin/rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /etc/apt/keyrings && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+
+RUN apt update \
+  && DEBIAN_FRONTEND=noninteractive apt install -y \
+  nodejs \
+  && apt clean \
+  && /bin/rm -rf /var/lib/apt/lists/*
+
+RUN npm install -g firebase-tools
+
+WORKDIR /repo
+
+USER cloudsdk
+
+RUN curl -L https://fly.io/install.sh | sh
+RUN echo export PATH='"'/home/cloudsdk/.fly/bin:'/home/rlprimeau/.vscode-server/bin/fdb98833154679dbaa7af67a5a29fe19e55c2b73/bin/remote-cli:/home/rlprimeau/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files (x86)/Common Files/Intel/Shared Libraries/redist/intel64/compiler:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/MinGW/bin:/mnt/c/Program Files/Git/cmd:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/Program Files/PuTTY/:/mnt/c/Users/prime/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/prime/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/prime/AppData/Local/GitHubDesktop/bin:/mnt/c/Users/prime/Flutter/flutter/bin:/mnt/c/Users/prime/AppData/Local/Microsoft/WindowsApps/python.exe:/mnt/c/Users/prime/AppData/Local/Microsoft/WindowsApps/python.exe:/mnt/c/Program Files/heroku/bin:/snap/bin:/home/rlprimeau/.fly/bin:/home/rlprimeau/.fly/bin''"' >> /home/cloudsdk/.bashrc
+
+CMD firebase emulators:start --project "devops-react" --config firebase.json.test --import /var/lib/firebase/data --export-on-exit /var/lib/firebase/data
+# CMD bash -c "while true ; do date ; sleep 30 ; done"
+
